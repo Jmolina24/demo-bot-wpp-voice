@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 
 
 app.get('/call', async (req, res) => {
-  console.log("Iniciando llamada...");
+ 
   const { phone } = req.query;
 
   if (!phone) {
@@ -60,6 +60,7 @@ app.get('/call', async (req, res) => {
 /////////////////////////////////////////////////
 
 app.post('/question', (req, res) => {
+   console.log("Realizando Preguntas llamada...");
   const { step, phone } = req.query;
   const currentStep = parseInt(step);
 
@@ -110,6 +111,7 @@ app.post('/question', (req, res) => {
 /////////////////////////////////////////////////
 
 app.post('/answer', (req, res) => {
+  console.log("Recibiendo Respuesta llamada...");
   const { step, phone } = req.query;
   const speech = req.body.SpeechResult || '';
 
