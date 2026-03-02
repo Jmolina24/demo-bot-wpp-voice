@@ -36,7 +36,6 @@ app.get('/', (req, res) => {
 
 
 app.get('/call', async (req, res) => {
-
   const { phone } = req.query;
 
   if (!phone) {
@@ -45,15 +44,21 @@ app.get('/call', async (req, res) => {
 
   sessions[phone] = { answers: [] };
 
-  await client.calls.create({
-    url: `${process.env.BASE_URL}/question?step=0&phone=${phone}`,
-    to: phone,
-    from: process.env.TWILIO_PHONE_NUMBER,
-    method: 'POST'
-  });
-  console.log(`Llamada iniciada a ${phone}`);
-  console.log(`URL de preguntas: ${process.env.BASE_URL}/question?step=0&phone=${phone}`);
-  res.send("Llamada iniciada");
+  try {
+    const call = await client.calls.create({
+      url: `${process.env.BASE_URL}/question?step=0&phone=${phone}`,
+      to: phone,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      method: 'POST'
+    });
+
+    console.log(`✅ Llamada iniciada a ${phone}, SID: ${call.sid}`);
+    console.log(`   URL de preguntas: ${process.env.BASE_URL}/question?step=0&phone=${phone}`);
+    res.send("Llamada iniciada");
+  } catch (err) {
+    console.error('❌ Error al iniciar llamada:', err.message);
+    res.status(500).send('No se pudo iniciar la llamada');
+  }
 });
 
 /////////////////////////////////////////////////
@@ -62,8 +67,7 @@ app.get('/call', async (req, res) => {
 
 // helper para ver si Twilio está llamando a la URL y con qué método
 app.all('/question', (req, res, next) => {
-  console.log(`
-*** /question recibida (${req.method}) con query:`, req.query);
+  console.log(` *** /question recibida (${req.method}) con query:`, req.query);
   if (req.method === 'GET') {
     // Twilio puede usar GET en redirecciones o al probar manualmente
     return res.send('una petición GET a /question');
