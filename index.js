@@ -66,20 +66,39 @@ app.post('/question', (req, res) => {
   const twiml = new twilio.twiml.VoiceResponse();
 
   if (currentStep < survey.questions.length) {
-    twiml.gather({
+
+    const gather = twiml.gather({
       input: 'speech',
       action: `/answer?step=${currentStep}&phone=${phone}`,
       method: 'POST',
-      timeout: 5
-    }).say(survey.questions[currentStep]);
+      timeout: 5,
+      language: 'es-MX'
+    });
+
+    gather.say(
+      {
+        voice: 'Polly.Lupe',
+        language: 'es-MX'
+      },
+      survey.questions[currentStep]
+    );
+
   } else {
-    twiml.say("Gracias por completar la encuesta.");
+
+    twiml.say(
+      {
+        voice: 'Polly.Lupe',
+        language: 'es-MX'
+      },
+      "Gracias por completar la encuesta."
+    );
+
     twiml.hangup();
 
     console.log("Encuesta completada:", phone);
     console.log("Respuestas:", sessions[phone]?.answers);
 
-    delete sessions[phone]; // limpiar memoria
+    delete sessions[phone];
   }
 
   res.type('text/xml');
