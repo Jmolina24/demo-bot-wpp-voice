@@ -30,7 +30,13 @@ const sessions = {};
 // INICIAR LLAMADA
 /////////////////////////////////////////////////
 
+app.get('/', (req, res) => {
+  res.json("API de encuesta por voz con Twilio");
+});
+
+
 app.get('/call', async (req, res) => {
+  console.log("Iniciando llamada...");
   const { phone } = req.query;
 
   if (!phone) {
