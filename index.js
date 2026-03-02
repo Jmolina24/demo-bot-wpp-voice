@@ -60,51 +60,90 @@ app.get('/call', async (req, res) => {
 /////////////////////////////////////////////////
 
 app.post('/question', (req, res) => {
-   console.log("Realizando Preguntas llamada...");
+  console.log("Realizando Preguntas llamada...");
   const { step, phone } = req.query;
-  const currentStep = parseInt(step);
-
+  const currentStep = parseInt(step, 10);
   const twiml = new twilio.twiml.VoiceResponse();
 
   if (currentStep < survey.questions.length) {
-
     const gather = twiml.gather({
       input: 'speech',
       action: `/answer?step=${currentStep}&phone=${phone}`,
       method: 'POST',
       timeout: 5,
-      language: 'es-MX'
+      language: 'es-ES'               // <-- idioma para reconocimiento
     });
 
+    // habla en español; se puede omitir voice o usar una voz española
     gather.say(
       {
-        voice: 'Polly.Lupe',
-        language: 'es-MX'
+        // voice: 'Polly.Miguel',     // opcional, elegir una voz española
+        language: 'es-ES'
       },
       survey.questions[currentStep]
     );
-
   } else {
-
     twiml.say(
       {
-        voice: 'Polly.Lupe',
-        language: 'es-MX'
+        // voice: 'Polly.Miguel',
+        language: 'es-ES'
       },
-      "Gracias por completar la encuesta."
+      'Gracias por completar la encuesta.'
     );
-
     twiml.hangup();
-
+  }
     console.log("Encuesta completada:", phone);
     console.log("Respuestas:", sessions[phone]?.answers);
-
-    delete sessions[phone];
-  }
-
-  res.type('text/xml');
-  res.send(twiml.toString());
+  res.type('text/xml').send(twiml.toString());
 });
+
+
+// app.post('/question', (req, res) => {
+//    console.log("Realizando Preguntas llamada...");
+//   const { step, phone } = req.query;
+//   const currentStep = parseInt(step);
+
+//   const twiml = new twilio.twiml.VoiceResponse();
+
+//   if (currentStep < survey.questions.length) {
+
+//     const gather = twiml.gather({
+//       input: 'speech',
+//       action: `/answer?step=${currentStep}&phone=${phone}`,
+//       method: 'POST',
+//       timeout: 5,
+//       language: 'es-MX'
+//     });
+
+//     gather.say(
+//       {
+//         voice: 'Polly.Lupe',
+//         language: 'es-MX'
+//       },
+//       survey.questions[currentStep]
+//     );
+
+//   } else {
+
+//     twiml.say(
+//       {
+//         voice: 'Polly.Lupe',
+//         language: 'es-MX'
+//       },
+//       "Gracias por completar la encuesta."
+//     );
+
+//     twiml.hangup();
+
+//     console.log("Encuesta completada:", phone);
+//     console.log("Respuestas:", sessions[phone]?.answers);
+
+//     delete sessions[phone];
+//   }
+
+//   res.type('text/xml');
+//   res.send(twiml.toString());
+// });
 
 /////////////////////////////////////////////////
 // RECIBIR RESPUESTA
