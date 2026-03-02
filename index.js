@@ -21,7 +21,7 @@ const survey = {
 };
 
 // Almacenamiento temporal en memoria
-const sessions = {}; 
+const sessions = {};
 // sessions = {
 //   "+573001234567": { answers: [] }
 // }
@@ -36,7 +36,7 @@ app.get('/', (req, res) => {
 
 
 app.get('/call', async (req, res) => {
- 
+
   const { phone } = req.query;
 
   if (!phone) {
@@ -51,7 +51,8 @@ app.get('/call', async (req, res) => {
     from: process.env.TWILIO_PHONE_NUMBER,
     method: 'POST'
   });
-
+  console.log(`Llamada iniciada a ${phone}`);
+  console.log(`URL de preguntas: ${process.env.BASE_URL}/question?step=0&phone=${phone}`);
   res.send("Llamada iniciada");
 });
 
