@@ -59,6 +59,17 @@ app.get('/call', async (req, res) => {
 // HACER PREGUNTA
 /////////////////////////////////////////////////
 
+// helper para ver si Twilio está llamando a la URL y con qué método
+app.all('/question', (req, res, next) => {
+  console.log(`
+*** /question recibida (${req.method}) con query:`, req.query);
+  if (req.method === 'GET') {
+    // Twilio puede usar GET en redirecciones o al probar manualmente
+    return res.send('una petición GET a /question');
+  }
+  next();
+});
+
 app.post('/question', (req, res) => {
   console.log("Realizando Preguntas llamada...");
   const { step, phone } = req.query;
@@ -66,12 +77,14 @@ app.post('/question', (req, res) => {
   const twiml = new twilio.twiml.VoiceResponse();
 
   if (currentStep < survey.questions.length) {
+    console.log(`--> enviando pregunta #${currentStep} a ${phone}`);
+
     const gather = twiml.gather({
       input: 'speech',
       action: `/answer?step=${currentStep}&phone=${phone}`,
       method: 'POST',
       timeout: 5,
-      language: 'es-ES'               // <-- idioma para reconocimiento
+      language: 'es-ES'               // reconocimiento en español
     });
 
     // habla en español; se puede omitir voice o usar una voz española
@@ -91,9 +104,12 @@ app.post('/question', (req, res) => {
       'Gracias por completar la encuesta.'
     );
     twiml.hangup();
+
+    console.log("✅ Encuesta completada:", phone);
+    console.log("📋 Respuestas:", sessions[phone]?.answers);
+    delete sessions[phone];
   }
-    console.log("Encuesta completada:", phone);
-    console.log("Respuestas:", sessions[phone]?.answers);
+
   res.type('text/xml').send(twiml.toString());
 });
 
@@ -172,6 +188,6 @@ app.post('/answer', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(process.env.PORT, () => {
-  console.log(  ` !! Servidor corriendo en puerto   ${process.env.PORT}  !!!` );
+app.listen(PORT, () => {
+  console.log(`📡 Servidor corriendo en puerto ${PORT}`);
 });
